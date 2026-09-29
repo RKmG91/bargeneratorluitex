@@ -1,0 +1,30 @@
+{
+  "name": "bargenerator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gerador local de códigos de barras para iReport",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node servidor.js",
+    "test": "node --test",
+    "build": "node scripts/empacotar.js"
+  },
+  "files": [
+    "servidor.js",
+    "public",
+    "README.md",
+    "Dockerfile",
+    "compose.yaml",
+    ".dockerignore",
+    "iniciar.cmd",
+    "scripts",
+    "test",
+    "npm-shrinkwrap.json"
+  ],
+  "dependencies": {
+    "bwip-js": "4.11.4"
+  }
+}

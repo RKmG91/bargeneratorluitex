@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BarGenerator · Gerador local</title><link rel="stylesheet" href="/estilos.css"><script src="/app.js" defer></script></head>
+<body>
+<header><a href="/" class="marca"><span aria-hidden="true">▥</span> BarGenerator</a><span class="selo">GERAÇÃO LOCAL</span></header>
+<main>
+<div class="abertura"><p class="sobre">CÓDIGOS PARA IMPRESSÃO</p><h1>Gerador de códigos de barras</h1><p>Gere a imagem. Copie a URL. Use no seu relatório.</p></div>
+<div class="bancada"><aside class="catalogo"><h2>1. Escolha o formato</h2><nav id="catalogo" aria-label="Formatos de código"></nav></aside>
+<section class="controles" aria-labelledby="titulo-config"><h2 id="titulo-config">2. Informe os dados</h2>
+<form id="formulario">
+<label for="tipo">Tipo de código</label><select id="tipo" name="tipo"><option value="code128">Code 128</option><option value="code39">Code 39</option><option value="ean13">EAN-13</option><option value="ean8">EAN-8</option><option value="upca">UPC-A</option><option value="interleaved2of5">Intercalado 2 de 5</option><option value="qrcode">QR Code</option><option value="datamatrix">Data Matrix</option></select>
+<label for="texto">Conteúdo</label><input id="texto" name="texto" value="123456789" maxlength="120" required autocomplete="off"><small>Preserve os zeros à esquerda.</small>
+<div class="campos"><div><label for="dpi">Resolução da impressora</label><select id="dpi" name="dpi"><option>203</option><option>300</option><option>600</option></select></div><div><label for="modulo">Pontos por módulo</label><input id="modulo" name="modulo" type="number" min="1" max="6" step="1" value="2" required></div></div>
+<label for="altura">Altura das barras (mm)</label><input id="altura" name="altura" type="number" min="5" max="60" step="0.5" value="15" required><small>QR Code e Data Matrix usam dimensões definidas pelo conteúdo e módulo.</small>
+<label for="rotacao">Rotação da imagem</label><select id="rotacao" name="rotacao"><option value="0">0° — original</option><option value="90">90° — horário</option><option value="180">180° — invertida</option><option value="270">270° — anti-horário</option></select>
+<label class="check"><input type="checkbox" id="legenda" checked> Exibir conteúdo abaixo das barras</label>
+<button type="submit" id="gerar">Gerar código</button>
+</form></section>
+<section class="resultado" aria-labelledby="titulo-previa">
+<div class="cabecalho-previa"><h2 id="titulo-previa">3. Baixe a imagem</h2><span>PNG</span></div>
+<div class="mesa"><div class="etiqueta"><img id="previa" alt="Código de barras gerado" hidden><p id="vazio">Gerando prévia…</p></div></div>
+<p id="estado" role="status" aria-live="polite"></p>
+<p class="nota">Prévia em pixels reais; use a rolagem para códigos largos. O tamanho físico depende da resolução selecionada.</p>
+<div class="acoes"><a id="baixar" class="botao secundario" hidden>Baixar PNG</a><button id="copiar" type="button" class="secundario" disabled>Copiar URL</button></div>
+<label for="url">URL da imagem para o relatório</label><textarea id="url" readonly rows="3" spellcheck="false"></textarea>
+<p class="nota">Em outro servidor, use o IP ou nome acessível pela máquina que executa o relatório.</p>
+</section></div>
+<footer><strong>Impressão nítida começa na escala.</strong><p>Configure o relatório no tamanho físico indicado. Imprima a 100%, sem “ajustar à página”. Valide a leitura na Zebra.</p></footer>
+</main></body></html>

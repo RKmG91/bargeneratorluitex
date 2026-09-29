@@ -1,0 +1,59 @@
+BARGENERATOR — ENTREGA DOCKER 1.0.0
+
+Arquitetura: Linux amd64 (Intel/AMD x86-64).
+Windows exige Docker em modo de contêineres Linux.
+Requisitos: Docker Engine e Compose v2 com suporte a --wait.
+Não exige Node.js, npm ou compilação no destino. A imagem já contém as dependências.
+Não é necessário baixar a imagem de um registro.
+
+INSTALAÇÃO
+Mantenha todos os arquivos desta pasta juntos.
+Linux: sh instalar.sh
+Windows PowerShell: .\instalar.ps1
+Caso políticas locais impeçam scripts, execute os comandos abaixo manualmente:
+
+docker load -i bargenerator-1.0.0-linux-amd64.tar.gz
+docker compose up -d --wait --wait-timeout 90
+docker compose ps
+
+VALIDAÇÃO
+curl http://127.0.0.1:3000/health
+Resposta esperada: {"status":"ok"}
+
+Imagem de teste:
+http://127.0.0.1:3000/barcode.png?tipo=code128&texto=123456789&rotacao=90
+
+PUBLICAÇÃO PARA O SANKHYA
+Por padrão, a porta é publicada SOMENTE no loopback do host.
+Configure um proxy reverso com domínio e certificado HTTPS válido apontando para
+http://127.0.0.1:3000. Esse endereço vale para proxy executando no próprio host.
+Se o proxy estiver em outro contêiner, configure uma rede Docker compartilhada;
+127.0.0.1 dentro do proxy aponta para ele mesmo.
+
+Para publicar em outra interface/porta, crie .env nesta pasta, por exemplo:
+ENDERECO_PUBLICACAO=0.0.0.0
+PORTA_PUBLICA=3000
+Depois execute docker compose up -d.
+Restrinja o acesso no firewall conforme os IPs de origem e a topologia da empresa.
+A aplicação não possui autenticação. Não adicione login interativo na rota de imagem.
+Preserve parâmetros da URL. Use HTTPS e considere omitir o texto dos logs do proxy.
+
+O servidor Sankhya na nuvem deve conseguir acessar:
+https://SEU-DOMINIO/barcode.png?tipo=code128&texto=123456789&rotacao=90
+Confirme regras de saída com a hospedagem Sankhya e valide a impressão física.
+O endpoint pode retornar HTTP 400 para conteúdo ou parâmetros inválidos.
+
+OPERAÇÃO
+docker compose logs --tail 100
+docker compose restart
+docker compose down
+
+O restart unless-stopped recupera processos encerrados e reinícios do Docker,
+desde que o serviço não tenha sido parado manualmente. Habilite o Docker no boot.
+O healthcheck sinaliza falhas; Docker não reinicia automaticamente só por unhealthy.
+Não há banco de dados nem volume persistente obrigatório.
+
+INTEGRIDADE
+Linux: sha256sum -c SHA256SUMS.txt
+Windows: Get-FileHash .\bargenerator-1.0.0-linux-amd64.tar.gz -Algorithm SHA256
+Compare com SHA256SUMS.txt.

@@ -1,0 +1,6 @@
+services:
+  bargenerator:
+    build: .
+    ports:
+      - "${PORTA_PUBLICA:-3000}:3000"
+    restart: unless-stopped
