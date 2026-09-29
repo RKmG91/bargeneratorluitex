@@ -116,3 +116,7 @@ Referências:
 - https://barcode.tec-it.com/en (referência de interface)
 - https://github.com/metafloor/bwip-js (motor de geração)
 - https://jasperreports.sourceforge.net/6.21.3/sample.reference/images/index.html (imagens por URL)
+
+## Publicação automática
+
+O GitHub Actions testa e publica a imagem Docker a cada push na main. Consulte [deploy/DEPLOY-AUTOMATICO.md](deploy/DEPLOY-AUTOMATICO.md) para instalar pelo GHCR, fixar versões e concluir a automação no servidor de destino.

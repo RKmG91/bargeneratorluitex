@@ -1,0 +1,81 @@
+name: Testar e publicar Docker
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publicar-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  testar:
+    name: Testar aplicação
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+
+  publicar:
+    name: Publicar imagem no GHCR
+    needs: testar
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Definir identificação da imagem
+        shell: bash
+        run: |
+          echo "IMAGEM=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+      - name: Construir imagem Linux amd64
+        shell: bash
+        run: |
+          docker build --platform linux/amd64 \
+            --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            -t "$IMAGEM:sha-$GITHUB_SHA" .
+      - name: Validar aplicação dentro da imagem
+        shell: bash
+        run: |
+          docker run -d --name bargenerator-ci -p 127.0.0.1:3001:3000 "$IMAGEM:sha-$GITHUB_SHA"
+          trap 'docker rm -f bargenerator-ci' EXIT
+          docker cp test bargenerator-ci:/app/test
+          docker exec bargenerator-ci node --test
+          curl --fail --retry 5 --retry-connrefused http://127.0.0.1:3001/health
+          curl --fail "http://127.0.0.1:3001/barcode.png?texto=123456789&rotacao=90" -o /tmp/codigo.png
+      - name: Autenticar e publicar
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          trap 'docker logout ghcr.io' EXIT
+          docker push "$IMAGEM:sha-$GITHUB_SHA"
+          docker tag "$IMAGEM:sha-$GITHUB_SHA" "$IMAGEM:main"
+          docker push "$IMAGEM:main"
+          {
+            echo "### Imagem publicada"
+            echo "\`$IMAGEM:sha-$GITHUB_SHA\`"
+            echo ""
+            echo "Canal main: \`$IMAGEM:main\`"
+            echo ""
+            echo "O servidor de produção ainda precisa ser configurado."
+          } >> "$GITHUB_STEP_SUMMARY"
